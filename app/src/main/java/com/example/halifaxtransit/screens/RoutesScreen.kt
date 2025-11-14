@@ -19,7 +19,7 @@ fun RoutesScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "More coming soon",
+            text = "Coming soon",
             fontSize = 22.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onBackground
