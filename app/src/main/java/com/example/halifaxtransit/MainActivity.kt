@@ -1,6 +1,7 @@
 package com.example.halifaxtransit
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -10,38 +11,34 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.halifaxtransit.ui.theme.HalifaxTransitTheme
-import com.mapbox.geojson.Point
-import com.mapbox.maps.extension.compose.MapEffect
-import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
-import com.mapbox.maps.plugin.PuckBearing
-import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
-import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.maps.viewannotation.geometry
-import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import com.example.halifaxtransit.screens.BusMapScreen
+import com.example.halifaxtransit.screens.RoutesScreen
 import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
@@ -49,21 +46,22 @@ class MainActivity : ComponentActivity() {
 
     // Request permission to get location. Register for the 'activity result'. This handles the permission request and its result.
     val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
-        { isGranted ->
-            if (isGranted) {
-                Log.i("TESTING", "New permission granted by user, proceed...")
-            } else {
-                Log.i("TESTING", "Permission DENIED by user! Display toast...")
+    { isGranted ->
+        if (isGranted) {
+            Log.i("TESTING", "New permission granted by user, proceed...")
+        } else {
+            Log.i("TESTING", "Permission DENIED by user! Display toast...")
 
-                Toast.makeText(
-                    this,
-                    "Please enable location permission in Settings to use this feature.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            Toast.makeText(
+                this,
+                "Please enable location permission in Settings to use this feature.",
+                Toast.LENGTH_LONG
+            ).show()
         }
+    }
 
     @OptIn(ExperimentalMaterial3Api::class)
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -76,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
             // Check if permission granted
             LaunchedEffect(Unit) {
-                if (ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
                 ) {
                     Log.i("TESTING", "Permission previously granted, proceed...")
@@ -87,80 +85,73 @@ class MainActivity : ComponentActivity() {
             }
 
             HalifaxTransitTheme {
-                DisplayMap()
-            }
-        }
-    } // End onCreate
+                // collect the feed and pass into the BusMapScreen
+                val gtfsFeed by mainViewModel.gtfs.collectAsState()
 
-    @Composable
-    fun DisplayMap() {
+                // Navigation setup (WeatherApp-style Bottom Navigation)
+                val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
 
-        // Get entities (bus positions) from ViewModel
-        val gtfsFeed by mainViewModel.gtfs.collectAsState()
-        val busPositions = gtfsFeed?.entityList
-
-        val mapViewportState = rememberMapViewportState {
-            // set default camera zoom on Halifax centre
-            setCameraOptions {
-                zoom(12.0)
-                center(Point.fromLngLat(-63.5826, 44.6510))
-                pitch(0.0)
-                bearing(0.0)
-            }
-        }
-
-        MapboxMap(
-            mapViewportState = mapViewportState,
-        ) {
-            // Map effect will take effect once permission is granted to display user's location.
-            MapEffect(Unit) { mapView ->
-                mapView.location.updateSettings {
-                    locationPuck = createDefault2DPuck(withBearing = true)
-                    enabled = true
-                    puckBearing = PuckBearing.COURSE
-                    puckBearingEnabled = true
-                }
-                mapViewportState.transitionToFollowPuckState()
-            }
-
-            // Display bus locations
-            if (busPositions != null) {
-                for(bus in busPositions){
-                    val routeId = bus.vehicle.trip.routeId
-
-                    // Insert a ViewAnnotation at specific geo coordinate.
-                    ViewAnnotation(
-                        options = viewAnnotationOptions {
-                            // View annotation is placed at the specific geo coordinate
-                            geometry(Point.fromLngLat(bus.vehicle.position.longitude.toDouble(),
-                                bus.vehicle.position.latitude.toDouble()))
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = { TopBarContent() },
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationBarItem(
+                                selected = currentRoute == "map",
+                                onClick = {
+                                    navController.navigate("map") {
+                                        launchSingleTop = true
+                                        popUpTo(navController.graph.startDestinationId)
+                                    }
+                                },
+                                icon = { Icon(Icons.Default.Place, contentDescription = "Map") },
+                                label = { Text("Map") }
+                            )
+                            NavigationBarItem(
+                                selected = currentRoute == "routes",
+                                onClick = {
+                                    navController.navigate("routes") {
+                                        launchSingleTop = true
+                                        popUpTo(navController.graph.startDestinationId)
+                                    }
+                                },
+                                icon = { Icon(Icons.Default.Info, contentDescription = "Routes") },
+                                label = { Text("Routes") }
+                            )
                         }
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = "map",
+                        modifier = Modifier.padding(innerPadding)
                     ) {
-                        // ViewAnnotation content
-                        Box(
-                            modifier = Modifier.size(48.dp),
-                            contentAlignment = Alignment.TopCenter
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.bus),
-                                contentDescription = "Route $routeId",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-
-                            Text(
-                                text = routeId,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
+                        composable("map") {
+                            // pass the collected feed into the BusMapScreen composable
+                            BusMapScreen(gtfsFeed = gtfsFeed)
+                        }
+                        composable("routes") {
+                            RoutesScreen()
                         }
                     }
                 }
             }
         }
-    } // End DisplayMap
+    } // End onCreate
 
-} // End MainActivity
-
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun TopBarContent() {
+        TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+            ),
+            title = {
+                Text("Halifax Transit")
+            }
+        )
+    }
+}
