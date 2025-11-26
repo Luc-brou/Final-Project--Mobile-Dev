@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.HalifaxTransit.Splash" parent="Theme.SplashScreen">
+        <!-- Background color -->
+        <item name="android:windowSplashScreenBackground">@color/regal_navy</item>
+
+        <!-- Animated icon (use adaptive icon or AnimatedVectorDrawable) -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/bus</item>
+
+        <!-- Duration of icon animation -->
+        <item name="android:windowSplashScreenAnimationDuration">800</item>
+
+        <!-- Transition to main theme -->
+        <item name="postSplashScreenTheme">@style/Theme.HalifaxTransit</item>
+    </style>
+
+</resources>

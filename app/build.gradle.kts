@@ -66,6 +66,7 @@ dependencies {
     //
     implementation("androidx.compose.material3:material3:1.3.0")   // or latest stable
     implementation("com.google.android.material:material:1.12.0")  // Material Components
+    implementation("androidx.core:core-splashscreen:1.0.0")
 
     // GTFS transit feed - https://gtfs.org/realtime/language-bindings/java/
     implementation(group = "org.mobilitydata", name= "gtfs-realtime-bindings", version= "0.0.8")
