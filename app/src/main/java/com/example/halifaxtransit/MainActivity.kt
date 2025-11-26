@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
@@ -39,6 +40,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.halifaxtransit.ui.theme.HalifaxTransitTheme
 import com.example.halifaxtransit.screens.BusMapScreen
 import com.example.halifaxtransit.screens.RoutesScreen
+import com.example.halifaxtransit.ui.theme.FrostedMint
+import com.example.halifaxtransit.ui.theme.LightGreen
+import com.example.halifaxtransit.ui.theme.MintLeaf
+import com.example.halifaxtransit.ui.theme.RegalNavy
+import com.example.halifaxtransit.ui.theme.Verdigris
 import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
@@ -97,7 +103,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = { TopBarContent() },
                     bottomBar = {
-                        NavigationBar {
+                        NavigationBar(
+                            containerColor = MintLeaf // background of the bottom bar
+                        ) {
                             NavigationBarItem(
                                 selected = currentRoute == "map",
                                 onClick = {
@@ -107,7 +115,14 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 icon = { Icon(Icons.Default.Place, contentDescription = "Map") },
-                                label = { Text("Map") }
+                                label = { Text("Map") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = RegalNavy,
+                                    selectedTextColor = RegalNavy,
+                                    unselectedIconColor = Verdigris,
+                                    unselectedTextColor = Verdigris,
+                                    indicatorColor = LightGreen // highlight behind selected item
+                                )
                             )
                             NavigationBarItem(
                                 selected = currentRoute == "routes",
@@ -118,7 +133,14 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 icon = { Icon(Icons.Default.Info, contentDescription = "Routes") },
-                                label = { Text("Routes") }
+                                label = { Text("Routes") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = RegalNavy,
+                                    selectedTextColor = RegalNavy,
+                                    unselectedIconColor = Verdigris,
+                                    unselectedTextColor = Verdigris,
+                                    indicatorColor = LightGreen
+                                )
                             )
                         }
                     }
@@ -145,13 +167,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun TopBarContent() {
         TopAppBar(
+            title = { Text("Halifax Transit") },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ),
-            title = {
-                Text("Halifax Transit")
-            }
+                containerColor = RegalNavy,
+                titleContentColor = FrostedMint
+            )
         )
     }
 }

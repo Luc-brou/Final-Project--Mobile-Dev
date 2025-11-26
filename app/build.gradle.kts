@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -61,6 +62,10 @@ dependencies {
     // Mapbox
     implementation("com.mapbox.maps:android-ndk27:11.16.2")
     implementation("com.mapbox.extension:maps-compose-ndk27:11.16.2")
+
+    //
+    implementation("androidx.compose.material3:material3:1.3.0")   // or latest stable
+    implementation("com.google.android.material:material:1.12.0")  // Material Components
 
     // GTFS transit feed - https://gtfs.org/realtime/language-bindings/java/
     implementation(group = "org.mobilitydata", name= "gtfs-realtime-bindings", version= "0.0.8")
