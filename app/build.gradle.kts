@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,4 +71,9 @@ dependencies {
 
     // GTFS transit feed - https://gtfs.org/realtime/language-bindings/java/
     implementation(group = "org.mobilitydata", name= "gtfs-realtime-bindings", version= "0.0.8")
+
+    //room storage
+    val roomVersion = "2.8.4"
+    implementation("androidx.room:room-runtime:$roomVersion")
+
 }
