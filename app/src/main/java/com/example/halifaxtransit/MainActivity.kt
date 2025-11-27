@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -36,6 +35,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.example.halifaxtransit.database.AppDatabase
+import com.example.halifaxtransit.database.User
 import com.example.halifaxtransit.screens.BusMapScreen
 import com.example.halifaxtransit.screens.RoutesScreen
 import com.example.halifaxtransit.ui.theme.FrostedMint
@@ -46,16 +48,17 @@ import com.example.halifaxtransit.ui.theme.RegalNavy
 import com.example.halifaxtransit.ui.theme.Verdigris
 
 class MainActivity : ComponentActivity() {
-    private val mainViewModel: MainViewModel by viewModels()
 
-    // Request permission to get location. Register for the 'activity result'. This handles the permission request and its result.
-    val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
-    { isGranted ->
+    //builds DB and ViewModel in same file
+    private lateinit var viewModel: MainViewModel
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
         if (isGranted) {
             Log.i("TESTING", "New permission granted by user, proceed...")
         } else {
             Log.i("TESTING", "Permission DENIED by user! Display toast...")
-
             Toast.makeText(
                 this,
                 "Please enable location permission in Settings to use this feature.",
@@ -70,16 +73,29 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // load bus positions from GTFS
-        mainViewModel.loadGtfsBusPositions()
+        // Build the database and DAO directly here
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "halifax-transit-db"
+        ).build()
+        val userDao = db.userDao()
+
+        // Create the ViewModel manually (no factory/DI yet)
+        viewModel = MainViewModel(userDao)
+
+        // Load bus positions from GTFS
+        viewModel.loadGtfsBusPositions()
 
         setContent {
             val context = LocalContext.current
 
-            // Check if permission granted
+            // Check location permission
             LaunchedEffect(Unit) {
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
                 ) {
                     Log.i("TESTING", "Permission previously granted, proceed...")
                 } else {
@@ -89,10 +105,8 @@ class MainActivity : ComponentActivity() {
             }
 
             HalifaxTransitTheme {
-                // collect the feed and pass into the BusMapScreen
-                val gtfsFeed by mainViewModel.gtfs.collectAsState()
+                val gtfsFeed by viewModel.gtfs.collectAsState()
 
-                // Navigation setup (WeatherApp-style Bottom Navigation)
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
@@ -101,9 +115,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = { TopBarContent() },
                     bottomBar = {
-                        NavigationBar(
-                            containerColor = MintLeaf // background of the bottom bar
-                        ) {
+                        NavigationBar(containerColor = MintLeaf) {
                             NavigationBarItem(
                                 selected = currentRoute == "map",
                                 onClick = {
@@ -119,7 +131,7 @@ class MainActivity : ComponentActivity() {
                                     selectedTextColor = RegalNavy,
                                     unselectedIconColor = Verdigris,
                                     unselectedTextColor = Verdigris,
-                                    indicatorColor = LightGreen // highlight behind selected item
+                                    indicatorColor = LightGreen
                                 )
                             )
                             NavigationBarItem(
@@ -149,7 +161,6 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("map") {
-                            // pass the collected feed into the BusMapScreen composable
                             BusMapScreen(gtfsFeed = gtfsFeed)
                         }
                         composable("routes") {
@@ -159,7 +170,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    } // End onCreate
+    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
