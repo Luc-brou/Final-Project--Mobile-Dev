@@ -1,25 +1,21 @@
-// UserDao.kt
 package com.example.halifaxtransit.database
 
 import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
 import androidx.room.Query
+import com.example.halifaxtransit.models.Route
 
 @Dao
-interface UserDao {
-    @Query("SELECT * FROM user")
-    fun getAll(): List<User>
+interface RoutesDao {
+    @Query("SELECT * FROM routes")
+    fun getAll(): List<Route>
 
-    @Query("SELECT * FROM user WHERE uid IN (:userIds)")
-    fun loadAllByIds(userIds: IntArray): List<User>
+    @Query("SELECT * FROM routes WHERE route_id = :id")
+    fun loadAllByIds(id: String): Route?
 
-    @Query("SELECT * FROM user WHERE first_name LIKE :first AND last_name LIKE :last LIMIT 1")
-    fun findByName(first: String, last: String): User?
+    @Query("SELECT * FROM routes WHERE route_short_name= :shortName")
+    fun getByShortName(shortName: String): Route?
 
-    @Insert
-    fun insertAll(vararg users: User)
+    @Query("SELECT * FROM routes WHERE Highlights = 1")
+    fun getHighlighted(): List<Route>
 
-    @Delete
-    fun delete(user: User)
 }

@@ -37,7 +37,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.example.halifaxtransit.database.AppDatabase
-import com.example.halifaxtransit.database.User
 import com.example.halifaxtransit.screens.BusMapScreen
 import com.example.halifaxtransit.screens.RoutesScreen
 import com.example.halifaxtransit.ui.theme.FrostedMint

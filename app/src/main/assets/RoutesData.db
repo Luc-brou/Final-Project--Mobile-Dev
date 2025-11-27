@@ -1,0 +1,81 @@
+route_id,route_short_name,route_long_name,Highlights
+1,1,Spring Garden,FALSE
+10A,10A,Dalhousie - Bridge Terminal,FALSE
+10B,10B,Dalhousie - Micmac Terminal,FALSE
+10C,10C,Dalhousie,FALSE
+123,123,Timberlea Express,FALSE
+127,127,Cowie Hill Express,FALSE
+135,135,Flamingo Express,FALSE
+136,136,Farnham Gate Express,FALSE
+137,137,Clayton Park Express,FALSE
+138,138,Parkland Express,FALSE
+158,158,Woodlawn Express,FALSE
+159,159,Colby Express,FALSE
+161,161,North Preston Express,FALSE
+165,165,Caldwell Express,FALSE
+168A,168A,Auburn Express,FALSE
+168B,168B,Cherry Brook Express,FALSE
+182,182,First Lake Express,FALSE
+183,183,Springfield Express,FALSE
+185,185,Millwood Express,FALSE
+186,186,Beaver Bank Express,FALSE
+192,192,Hemlock Ravine Express,FALSE
+194,194,West Bedford Express,FALSE
+196,196,Basinview Express,FALSE
+2,2,Fairview,FALSE
+21,21,Lakeside - Timberlea,FALSE
+22,22,Armdale,FALSE
+24,24,Leiblin Park,FALSE
+25,25,Governors Brook,FALSE
+26,26,Springvale,FALSE
+28,28,Bayers Lake,FALSE
+29,29,Barrington,FALSE
+3,3,CrossTown,FALSE
+30A,30A,Parkland,FALSE
+30B,30B,Dunbrack,FALSE
+320,320,Airport - Fall River Regional Exp,FALSE
+330,330,Tantallon - Sheldrake Lake Reg Exp,FALSE
+370,370,Porters Lake Regional Express,FALSE
+39,39,Flamingo,FALSE
+4,4,Universities,FALSE
+401,401,Preston-Porters Lake-Grand Desert,FALSE
+415,415,Purcells Cove,FALSE
+433,433,Tantallon,FALSE
+5,5,Portland,FALSE
+50,50,Dockyard,FALSE
+51A,51A,Windmill,FALSE
+51B,51B,Windmill,FALSE
+53,53,Notting Park,FALSE
+54,54,Montebello,FALSE
+55,55,Port Wallace,FALSE
+56,56,Dartmouth Crossing,FALSE
+58,58,Woodlawn,FALSE
+59,59,Colby,FALSE
+61,61,North Preston,FALSE
+62,62,Grahams Grove,FALSE
+63,63,Mount Edward,FALSE
+64,64,Akerley,FALSE
+65,65,Caldwell,FALSE
+67,67,Baker,FALSE
+68,68,Cherry Brook,FALSE
+6A,6A,Woodside,FALSE
+6B,6B,Eastern Passage,FALSE
+6C,6C,Heritage Hills,FALSE
+72,72,Portland Hills,FALSE
+7A,7A,Peninsula,FALSE
+7B,7B,Peninsula,FALSE
+8,8,Sackville Corridor,FALSE
+82,82,First Lake,FALSE
+83,83,Springfield,FALSE
+84,84,Glendale Express,FALSE
+85,85,Millwood,FALSE
+86,86,Beaver Bank,FALSE
+87,87,Sackville-Dartmouth,FALSE
+88,88,Bedford Commons,FALSE
+90,90,Larry Uteck,FALSE
+91,91,Hemlock Ravine,FALSE
+93,93,Bedford Highway,FALSE
+9A,9A,Greystone,FALSE
+9B,9B,Herring Cove,FALSE
+FerD,FerD,Alderney Ferry,FALSE
+FerW,FerW,Woodside Ferry,FALSE

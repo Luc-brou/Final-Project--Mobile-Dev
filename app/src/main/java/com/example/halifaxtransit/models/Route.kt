@@ -4,11 +4,18 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-class Route {
-    @Entity
-    data class User(
-        @PrimaryKey val uid: Int,
-        @ColumnInfo(name = "first_name") val firstName: String?,
-        @ColumnInfo(name = "last_name") val lastName: String?
-    )
-}
+@Entity(tableName = "Routes")
+data class Route(
+    @PrimaryKey
+    @ColumnInfo(name = "route_id")
+    val routeId: String,
+
+    @ColumnInfo(name = "route_short_name")
+    val routeShortName: String,
+
+    @ColumnInfo(name = "route_long_name")
+    val routeLongName: String,
+
+    @ColumnInfo(name = "Highlights")
+    val highlights: Boolean
+)
