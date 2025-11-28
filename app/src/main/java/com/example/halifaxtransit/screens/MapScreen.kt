@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.halifaxtransit.GtfsBusPosition
+import com.example.halifaxtransit.models.Route
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -30,6 +31,8 @@ import com.mapbox.maps.viewannotation.geometry
 @Composable
 fun BusMapScreen(
     gtfsFeed: List<GtfsBusPosition>,
+    routes: List<Route>,
+    selectedRoutes: Set<String>,
     modifier: Modifier = Modifier
 ) {
     val mapViewportState = rememberMapViewportState {
@@ -57,37 +60,36 @@ fun BusMapScreen(
         }
 
         // Display bus locations
-        if (gtfsFeed.isNotEmpty()) {
-            for (bus in gtfsFeed) {
-                // ✅ Force conversion to Double if model uses Float
-                val lon = bus.lon.toDouble()
-                val lat = bus.lat.toDouble()
-                val routeId = bus.id
+        gtfsFeed.forEach { bus ->
+            val lon = bus.lon
+            val lat = bus.lat
+            val vehicleId = bus.id
 
-                ViewAnnotation(
-                    options = viewAnnotationOptions {
-                        geometry(Point.fromLngLat(lon, lat))
-                    }
+            // Check if this bus belongs to a selected route
+            val isHighlighted = selectedRoutes.contains(vehicleId)
+
+            ViewAnnotation(
+                options = viewAnnotationOptions {
+                    geometry(Point.fromLngLat(lon, lat))
+                }
+            ) {
+                Box(
+                    modifier = Modifier.size(48.dp),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    Box(
-                        modifier = Modifier.size(48.dp),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        Image(
-                            painter = painterResource(id = com.example.halifaxtransit.R.drawable.bus),
-                            contentDescription = "Route $routeId",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-
-                        Text(
-                            text = routeId,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = com.example.halifaxtransit.R.drawable.bus),
+                        contentDescription = "Bus $vehicleId",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Text(
+                        text = vehicleId,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isHighlighted) Color.Blue else Color.Black,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }

@@ -1,4 +1,3 @@
-// MainActivity.kt
 package com.example.halifaxtransit
 
 import android.Manifest
@@ -88,6 +87,8 @@ class MainActivity : ComponentActivity() {
 
             HalifaxTransitTheme {
                 val gtfsFeed by viewModel.gtfs.collectAsState()
+                val routes by viewModel.routes.collectAsState()
+                val selectedRoutes by viewModel.selectedRoutes.collectAsState()
 
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -143,10 +144,14 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("map") {
-                            BusMapScreen(gtfsFeed = gtfsFeed)
+                            BusMapScreen(
+                                gtfsFeed = gtfsFeed,
+                                routes = routes,
+                                selectedRoutes = selectedRoutes
+                            )
                         }
                         composable("routes") {
-                            RoutesScreen()
+                            RoutesScreen(viewModel = viewModel)
                         }
                     }
                 }
