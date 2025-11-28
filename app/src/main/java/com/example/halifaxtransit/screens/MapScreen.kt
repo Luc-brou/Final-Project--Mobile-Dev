@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import com.google.transit.realtime.GtfsRealtime
+import com.example.halifaxtransit.GtfsBusPosition
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -31,16 +29,13 @@ import com.mapbox.maps.viewannotation.geometry
 
 @Composable
 fun BusMapScreen(
-    gtfsFeed: GtfsRealtime.FeedMessage?,
+    gtfsFeed: List<GtfsBusPosition>,
     modifier: Modifier = Modifier
 ) {
-    // FeedMessage.entityList is the generated property for repeated FeedEntity
-    val busPositions = gtfsFeed?.entityList
-
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             zoom(12.0)
-            center(Point.fromLngLat(-63.5826, 44.6510))
+            center(Point.fromLngLat(-63.5826, 44.6510)) // Halifax downtown
             pitch(0.0)
             bearing(0.0)
         }
@@ -50,7 +45,7 @@ fun BusMapScreen(
         mapViewportState = mapViewportState,
         modifier = modifier.fillMaxSize()
     ) {
-        // Map effect will take effect once permission is granted to display user's location.
+        // Enable user location puck
         MapEffect(Unit) { mapView ->
             mapView.location.updateSettings {
                 locationPuck = createDefault2DPuck(withBearing = true)
@@ -62,14 +57,12 @@ fun BusMapScreen(
         }
 
         // Display bus locations
-        if (!busPositions.isNullOrEmpty()) {
-            for (feedEntity in busPositions) {
-                // defensive check: some entities may not have vehicle info
-                val vehicle = feedEntity.vehicle ?: continue
-                val pos = vehicle.position ?: continue
-                val routeId = vehicle.trip?.routeId ?: "?"
-                val lon = pos.longitude.toDouble()
-                val lat = pos.latitude.toDouble()
+        if (gtfsFeed.isNotEmpty()) {
+            for (bus in gtfsFeed) {
+                // ✅ Force conversion to Double if model uses Float
+                val lon = bus.lon.toDouble()
+                val lat = bus.lat.toDouble()
+                val routeId = bus.id
 
                 ViewAnnotation(
                     options = viewAnnotationOptions {

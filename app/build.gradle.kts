@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -63,7 +64,7 @@ dependencies {
     implementation("com.mapbox.maps:android-ndk27:11.16.2")
     implementation("com.mapbox.extension:maps-compose-ndk27:11.16.2")
 
-    //
+    //compose + splashscreen
     implementation("androidx.compose.material3:material3:1.3.0")   // or latest stable
     implementation("com.google.android.material:material:1.12.0")  // Material Components
     implementation("androidx.core:core-splashscreen:1.0.0")
@@ -74,5 +75,8 @@ dependencies {
     //room storage
     val roomVersion = "2.8.4"
     implementation("androidx.room:room-runtime:$roomVersion")
+
+    ksp("androidx.room:room-compiler:$roomVersion")
+
 
 }

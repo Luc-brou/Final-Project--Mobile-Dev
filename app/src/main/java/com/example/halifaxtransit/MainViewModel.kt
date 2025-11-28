@@ -1,48 +1,44 @@
 package com.example.halifaxtransit
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.halifaxtransit.database.RoutesDao
-import com.google.transit.realtime.GtfsRealtime
+import com.google.transit.realtime.GtfsRealtime.FeedMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.URL
 
-class MainViewModel(private val routesDao: RoutesDao) : ViewModel() {
+// Simple data class for bus positions
+data class GtfsBusPosition(val id: String, val lat: Float, val lon: Float)
 
-    private val _gtfs = MutableStateFlow<GtfsRealtime.FeedMessage?>(null)
-    val gtfs = _gtfs.asStateFlow()
+class MainViewModel(private val routesDao: RoutesDao? = null) : ViewModel() {
 
-    // Load Halifax transit bus positions
+    private val _gtfs = MutableStateFlow<List<GtfsBusPosition>>(emptyList())
+    val gtfs: StateFlow<List<GtfsBusPosition>> = _gtfs
+
     fun loadGtfsBusPositions() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                val url = URL("https://gtfs.halifax.ca/realtime/Vehicle/VehiclePositions.pb")
-                val feed = withContext(Dispatchers.IO) {
-                    GtfsRealtime.FeedMessage.parseFrom(url.openStream())
+                val url = URL("https://gtfs.halifax.ca/realtime/VehiclePositions.pb")
+                val feed = FeedMessage.parseFrom(url.openStream())
+
+                val positions = feed.entityList.mapNotNull { entity ->
+                    entity.vehicle?.let { veh ->
+                        GtfsBusPosition(
+                            id = veh.vehicle.id,
+                            lat = veh.position.latitude,
+                            lon = veh.position.longitude
+                        )
+                    }
                 }
-                _gtfs.value = feed
+
+                _gtfs.value = positions
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("GTFS", "Failed to load feed", e)
             }
-        }
-    }
-
-    // Example: insert a user
-    fun insertUser(user: User) {
-        viewModelScope.launch(Dispatchers.IO) {
-            routesDao.insertAll(user)
-        }
-    }
-
-    // Example: get all users
-    fun loadUsers() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val users = routesDao.getAll()
-            // Do something with users (emit via StateFlow, log, etc.)
         }
     }
 }

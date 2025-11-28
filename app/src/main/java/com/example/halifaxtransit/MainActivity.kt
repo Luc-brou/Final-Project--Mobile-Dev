@@ -1,3 +1,4 @@
+// MainActivity.kt
 package com.example.halifaxtransit
 
 import android.Manifest
@@ -15,49 +16,34 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.*
 import com.example.halifaxtransit.database.AppDatabase
+import com.example.halifaxtransit.database.RoutesDao
 import com.example.halifaxtransit.screens.BusMapScreen
 import com.example.halifaxtransit.screens.RoutesScreen
-import com.example.halifaxtransit.ui.theme.FrostedMint
-import com.example.halifaxtransit.ui.theme.HalifaxTransitTheme
-import com.example.halifaxtransit.ui.theme.LightGreen
-import com.example.halifaxtransit.ui.theme.MintLeaf
-import com.example.halifaxtransit.ui.theme.RegalNavy
-import com.example.halifaxtransit.ui.theme.Verdigris
+import com.example.halifaxtransit.ui.theme.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    //builds DB and ViewModel in same file
+    private lateinit var routesDao: RoutesDao
     private lateinit var viewModel: MainViewModel
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Log.i("TESTING", "New permission granted by user, proceed...")
+            Log.i("TESTING", "Location permission granted")
         } else {
-            Log.i("TESTING", "Permission DENIED by user! Display toast...")
+            Log.i("TESTING", "Location permission denied")
             Toast.makeText(
                 this,
                 "Please enable location permission in Settings to use this feature.",
@@ -72,33 +58,30 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Build the database and DAO directly here
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "halifax-transit-db"
-        ).build()
-        val userDao = db.userDao()
+        val db = AppDatabase.getDatabase(applicationContext)
+        routesDao = db.routesDao()
 
-        // Create the ViewModel manually (no factory/DI yet)
-        viewModel = MainViewModel(userDao)
+        CoroutineScope(Dispatchers.IO).launch {
+            val allRoutes = routesDao.getAll()
+            Log.d("DB_TEST", "Loaded ${allRoutes.size} routes from DB")
+        }
 
-        // Load bus positions from GTFS
+        // Instantiate ViewModel with a factory AFTER routesDao is available
+        val factory = MainViewModelFactory(routesDao)
+        viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
         viewModel.loadGtfsBusPositions()
 
         setContent {
             val context = LocalContext.current
 
-            // Check location permission
             LaunchedEffect(Unit) {
                 if (ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.ACCESS_FINE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    Log.i("TESTING", "Permission previously granted, proceed...")
+                    Log.i("TESTING", "Permission already granted")
                 } else {
-                    Log.i("TESTING", "Permission not yet granted, launching permission request...")
                     requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 }
             }
