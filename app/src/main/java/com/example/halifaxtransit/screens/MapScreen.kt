@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,8 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import com.example.halifaxtransit.GtfsBusPosition
-import com.example.halifaxtransit.models.Route
+import com.google.transit.realtime.GtfsRealtime
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -30,15 +31,16 @@ import com.mapbox.maps.viewannotation.geometry
 
 @Composable
 fun BusMapScreen(
-    gtfsFeed: List<GtfsBusPosition>,
-    routes: List<Route>,
-    selectedRoutes: Set<String>,
+    gtfsFeed: GtfsRealtime.FeedMessage?,
     modifier: Modifier = Modifier
 ) {
+    // FeedMessage.entityList is the generated property for repeated FeedEntity
+    val busPositions = gtfsFeed?.entityList
+
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             zoom(12.0)
-            center(Point.fromLngLat(-63.5826, 44.6510)) // Halifax downtown
+            center(Point.fromLngLat(-63.5826, 44.6510))
             pitch(0.0)
             bearing(0.0)
         }
@@ -48,7 +50,7 @@ fun BusMapScreen(
         mapViewportState = mapViewportState,
         modifier = modifier.fillMaxSize()
     ) {
-        // Enable user location puck
+        // Map effect will take effect once permission is granted to display user's location.
         MapEffect(Unit) { mapView ->
             mapView.location.updateSettings {
                 locationPuck = createDefault2DPuck(withBearing = true)
@@ -60,36 +62,39 @@ fun BusMapScreen(
         }
 
         // Display bus locations
-        gtfsFeed.forEach { bus ->
-            val lon = bus.lon
-            val lat = bus.lat
-            val vehicleId = bus.id
+        if (!busPositions.isNullOrEmpty()) {
+            for (feedEntity in busPositions) {
+                // defensive check: some entities may not have vehicle info
+                val vehicle = feedEntity.vehicle ?: continue
+                val pos = vehicle.position ?: continue
+                val routeId = vehicle.trip?.routeId ?: "?"
+                val lon = pos.longitude.toDouble()
+                val lat = pos.latitude.toDouble()
 
-            // Check if this bus belongs to a selected route
-            val isHighlighted = selectedRoutes.contains(vehicleId)
-
-            ViewAnnotation(
-                options = viewAnnotationOptions {
-                    geometry(Point.fromLngLat(lon, lat))
-                }
-            ) {
-                Box(
-                    modifier = Modifier.size(48.dp),
-                    contentAlignment = Alignment.TopCenter
+                ViewAnnotation(
+                    options = viewAnnotationOptions {
+                        geometry(Point.fromLngLat(lon, lat))
+                    }
                 ) {
-                    Image(
-                        painter = painterResource(id = com.example.halifaxtransit.R.drawable.bus),
-                        contentDescription = "Bus $vehicleId",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Text(
-                        text = vehicleId,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isHighlighted) Color.Blue else Color.Black,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    Box(
+                        modifier = Modifier.size(48.dp),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Image(
+                            painter = painterResource(id = com.example.halifaxtransit.R.drawable.bus),
+                            contentDescription = "Route $routeId",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        Text(
+                            text = routeId,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
             }
         }
