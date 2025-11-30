@@ -16,19 +16,17 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 
 class MainViewModel : ViewModel() {
+    //all assigned to variables so easier to read
     private val _gtfs = MutableStateFlow<GtfsRealtime.FeedMessage?>(null)
     val gtfs = _gtfs.asStateFlow()
-
     private val _routes = MutableStateFlow<List<Route>>(emptyList())
     val routes = _routes.asStateFlow()
-
-    // ✅ Add a property to hold the DAO instance
     private var routesDao: RoutesDao? = null
 
-    fun loadGtfsBusPositions() {
+    fun loadGtfsBusPositions() { //function to load bus positions on map
         viewModelScope.launch {
             try {
-                val url = URL("https://gtfs.halifax.ca/realtime/Vehicle/VehiclePositions.pb")
+                val url = URL("https://gtfs.halifax.ca/realtime/Vehicle/VehiclePositions.pb") //loads data from this
                 val feed = withContext(Dispatchers.IO) {
                     GtfsRealtime.FeedMessage.parseFrom(url.openStream())
                 }
@@ -39,7 +37,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun loadRoutes(context: Context) {
+    fun loadRoutes(context: Context) { //function to load routes
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val db = AppDatabase.getDatabase(context)
@@ -53,7 +51,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun toggleHighlight(routeId: String, highlight: Boolean) {
+    fun toggleHighlight(routeId: String, highlight: Boolean) { //function to toggle the highlight (checked) value
         viewModelScope.launch(Dispatchers.IO) {
             val dao = routesDao ?: return@launch
             dao.setHighlight(routeId, highlight)

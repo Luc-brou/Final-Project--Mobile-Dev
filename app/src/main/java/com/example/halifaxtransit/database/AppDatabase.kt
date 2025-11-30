@@ -8,7 +8,7 @@ import com.example.halifaxtransit.models.Route
 
 @Database(entities = [Route::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun routesDao(): RoutesDao
+    abstract fun routesDao(): RoutesDao //abstract function
 
     companion object {
         @Volatile
@@ -16,13 +16,13 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                val instance = Room.databaseBuilder( //this is our database
                     context.applicationContext,
                     AppDatabase::class.java,
                     "HalifaxTransit.db"
                 )
-                    .createFromAsset("RoutesData.db")
-                    .build()
+                    .createFromAsset("RoutesData.db") //this line seeds the database with the
+                    .build()                                          //file located in src/main/assets
                 INSTANCE = instance
                 instance
             }

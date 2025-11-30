@@ -37,24 +37,22 @@ fun RoutesScreen(viewModel: MainViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(Modifier.weight(1f)) {
-                    // Short name below
-                    Text(route.routeShortName, modifier = Modifier.padding(top = 4.dp))
 
-                    // Divider line between number and name
-                    HorizontalDivider(
+                    Text(route.routeShortName, modifier = Modifier.padding(top = 4.dp)) // route short name
+
+                    HorizontalDivider( // divider line between number and name
                         modifier = Modifier.padding(vertical = 4.dp),
                         thickness = 1.dp,
                         color = Color.LightGray
                     )
 
-                    // Route long name
-                    Text(route.routeLongName, style = MaterialTheme.typography.bodyMedium)
+                    Text(route.routeLongName, style = MaterialTheme.typography.bodyMedium)  // route long name
                 }
 
                 Checkbox(
                     checked = route.highlights,
-                    onCheckedChange = { checked ->
-                        viewModel.toggleHighlight(route.routeId, checked)
+                    onCheckedChange = { checked -> //this updates the route id's bool value (1 or 0) aka if its checked
+                        viewModel.toggleHighlight(route.routeId, checked) //checked is passing in bool val 1
                     }
                 )
             }

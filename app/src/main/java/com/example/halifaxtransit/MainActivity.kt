@@ -50,8 +50,7 @@ import kotlin.getValue
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
-    // Request permission to get location. Register for the 'activity result'. This handles the permission request and its result.
-    val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
+    val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) //requests perms to launch
     { isGranted ->
         if (isGranted) {
             Log.i("TESTING", "New permission granted by user, proceed...")
@@ -72,14 +71,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // load bus positions from GTFS
-        mainViewModel.loadGtfsBusPositions()
+        mainViewModel.loadGtfsBusPositions() // load bus positions from feed
 
         setContent {
             val context = LocalContext.current
 
-            // Check if permission granted
-            LaunchedEffect(Unit) {
+            LaunchedEffect(Unit) { //this is the popup in the app for accesing location
                 if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
                 ) {
@@ -91,10 +88,9 @@ class MainActivity : ComponentActivity() {
             }
 
             HalifaxTransitTheme {
-                // collect the feed and pass into the BusMapScreen
-                val gtfsFeed by mainViewModel.gtfs.collectAsState()
 
-                // Navigation setup (WeatherApp-style Bottom Navigation)
+                val gtfsFeed by mainViewModel.gtfs.collectAsState() // collects the feed and passes it into the map screen
+
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
@@ -104,7 +100,7 @@ class MainActivity : ComponentActivity() {
                     topBar = { TopBarContent() },
                     bottomBar = {
                         NavigationBar(
-                            containerColor = MintLeaf // background of the bottom bar
+                            containerColor = MintLeaf
                         ) {
                             NavigationBarItem(
                                 selected = currentRoute == "map",
@@ -121,7 +117,7 @@ class MainActivity : ComponentActivity() {
                                     selectedTextColor = RegalNavy,
                                     unselectedIconColor = Verdigris,
                                     unselectedTextColor = Verdigris,
-                                    indicatorColor = LightGreen // highlight behind selected item
+                                    indicatorColor = LightGreen
                                 )
                             )
                             NavigationBarItem(
@@ -151,17 +147,16 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("map") {
-                            // pass the collected feed into the BusMapScreen composable
-                            BusMapScreen(gtfsFeed = gtfsFeed, viewModel = mainViewModel)
+                            BusMapScreen(gtfsFeed = gtfsFeed, viewModel = mainViewModel) //only needed here because crashes if values aren't passed in
                         }
                         composable("routes") {
-                            RoutesScreen(viewModel = mainViewModel)
+                            RoutesScreen(viewModel = mainViewModel) //same here
                         }
                     }
                 }
             }
         }
-    } // End onCreate
+    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

@@ -30,16 +30,16 @@ import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import com.mapbox.maps.viewannotation.geometry
 
 @Composable
-fun BusMapScreen(
-    viewModel: MainViewModel,
-    gtfsFeed: GtfsRealtime.FeedMessage?,
+fun BusMapScreen( //this is our function to call in main
+    viewModel: MainViewModel, //we pass in mainviewmodel
+    gtfsFeed: GtfsRealtime.FeedMessage?, //and gtfsFeed as parameters
     modifier: Modifier = Modifier
 ) {
     val busPositions = gtfsFeed?.entityList
     val routes = viewModel.routes.collectAsState().value
 
-    val mapViewportState = rememberMapViewportState {
-        setCameraOptions {
+    val mapViewportState = rememberMapViewportState { //this is for remembering how
+        setCameraOptions {                            //much the map is zoomed in/out/moved
             zoom(12.0)
             center(Point.fromLngLat(-63.5826, 44.6510))
             pitch(0.0)
@@ -61,24 +61,21 @@ fun BusMapScreen(
             mapViewportState.transitionToFollowPuckState()
         }
 
-        // Display bus locations
-        if (!busPositions.isNullOrEmpty()) {
+        if (!busPositions.isNullOrEmpty()) { // displays bus locations
             for (feedEntity in busPositions) {
                 val vehicle = feedEntity.vehicle ?: continue
                 val pos = vehicle.position ?: continue
                 val routeId = vehicle.trip?.routeId ?: "?"
-                val lon = pos.longitude.toDouble()
-                val lat = pos.latitude.toDouble()
+                val lon = pos.longitude.toDouble() //converts to double
+                val lat = pos.latitude.toDouble() //converts to double
 
-                // ✅ check highlight flag from DB
                 val route = routes.find { it.routeId == routeId }
-                val isHighlighted = route?.highlights == true
+                val isHighlighted = route?.highlights == true //variable for if is selected
 
-                // choose drawable based on highlight
-                val busDrawableRes = if (isHighlighted) {
-                    com.example.halifaxtransit.R.drawable.busblue
+                val busDrawableRes = if (isHighlighted) { //aka if highlighted bool = 1
+                    com.example.halifaxtransit.R.drawable.busblue //bool = 1
                 } else {
-                    com.example.halifaxtransit.R.drawable.bus
+                    com.example.halifaxtransit.R.drawable.bus //bool = 0
                 }
 
                 ViewAnnotation(
@@ -91,13 +88,13 @@ fun BusMapScreen(
                         contentAlignment = Alignment.TopCenter
                     ) {
                         Image(
-                            painter = painterResource(id = busDrawableRes),
+                            painter = painterResource(id = busDrawableRes), //dynamically chooses which bus image to render
                             contentDescription = "Route $routeId",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
 
-                        Text(
+                        Text( //overlays the bus id on the bus image (ex: 8, 91)
                             text = routeId,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,

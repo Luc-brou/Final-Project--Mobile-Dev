@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Halifax Transit custom palette -->
+    <!-- custom palette -->
     <color name="frosted_mint">#E5F9E0</color>
     <color name="light_green">#A3F7B5</color>
     <color name="mint_leaf">#40C9A2</color>
     <color name="verdigris">#2F9C95</color>
     <color name="regal_navy">#1B4079</color>
-
-    <!-- Keep black/white for contrast if needed -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 </resources>
