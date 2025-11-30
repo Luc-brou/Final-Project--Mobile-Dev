@@ -43,7 +43,7 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val db = AppDatabase.getDatabase(context)
-                routesDao = db.routesDao()                  // ✅ store instance
+                routesDao = db.routesDao()
                 val dbRoutes = routesDao!!.getAll()
                 _routes.value = dbRoutes
                 Log.d("TESTING", "Loaded ${dbRoutes.size} routes from DB")

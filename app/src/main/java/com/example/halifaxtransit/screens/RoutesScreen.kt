@@ -32,8 +32,8 @@ fun RoutesScreen(viewModel: MainViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-                    .border(1.dp, Color.Gray)        // ✅ border around each box
-                    .padding(8.dp),                  // inner padding
+                    .border(1.dp, Color.Gray)
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(Modifier.weight(1f)) {

@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("map") {
                             // pass the collected feed into the BusMapScreen composable
-                            BusMapScreen(gtfsFeed = gtfsFeed)
+                            BusMapScreen(gtfsFeed = gtfsFeed, viewModel = mainViewModel)
                         }
                         composable("routes") {
                             RoutesScreen(viewModel = mainViewModel)

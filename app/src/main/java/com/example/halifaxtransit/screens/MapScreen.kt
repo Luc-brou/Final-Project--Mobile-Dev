@@ -5,10 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import com.example.halifaxtransit.MainViewModel
 import com.google.transit.realtime.GtfsRealtime
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapEffect
@@ -31,11 +31,12 @@ import com.mapbox.maps.viewannotation.geometry
 
 @Composable
 fun BusMapScreen(
+    viewModel: MainViewModel,
     gtfsFeed: GtfsRealtime.FeedMessage?,
     modifier: Modifier = Modifier
 ) {
-    // FeedMessage.entityList is the generated property for repeated FeedEntity
     val busPositions = gtfsFeed?.entityList
+    val routes = viewModel.routes.collectAsState().value
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -50,7 +51,6 @@ fun BusMapScreen(
         mapViewportState = mapViewportState,
         modifier = modifier.fillMaxSize()
     ) {
-        // Map effect will take effect once permission is granted to display user's location.
         MapEffect(Unit) { mapView ->
             mapView.location.updateSettings {
                 locationPuck = createDefault2DPuck(withBearing = true)
@@ -64,12 +64,22 @@ fun BusMapScreen(
         // Display bus locations
         if (!busPositions.isNullOrEmpty()) {
             for (feedEntity in busPositions) {
-                // defensive check: some entities may not have vehicle info
                 val vehicle = feedEntity.vehicle ?: continue
                 val pos = vehicle.position ?: continue
                 val routeId = vehicle.trip?.routeId ?: "?"
                 val lon = pos.longitude.toDouble()
                 val lat = pos.latitude.toDouble()
+
+                // ✅ check highlight flag from DB
+                val route = routes.find { it.routeId == routeId }
+                val isHighlighted = route?.highlights == true
+
+                // choose drawable based on highlight
+                val busDrawableRes = if (isHighlighted) {
+                    com.example.halifaxtransit.R.drawable.busblue
+                } else {
+                    com.example.halifaxtransit.R.drawable.bus
+                }
 
                 ViewAnnotation(
                     options = viewAnnotationOptions {
@@ -81,7 +91,7 @@ fun BusMapScreen(
                         contentAlignment = Alignment.TopCenter
                     ) {
                         Image(
-                            painter = painterResource(id = com.example.halifaxtransit.R.drawable.bus),
+                            painter = painterResource(id = busDrawableRes),
                             contentDescription = "Route $routeId",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
